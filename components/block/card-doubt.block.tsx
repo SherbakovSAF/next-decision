@@ -1,6 +1,5 @@
 import { ChevronsRight } from "lucide-react";
 import ColorCardElement from "../elements/color-card.element";
-import DoubtModal from "./doubt-modal.block";
 import { differenceInDays } from "date-fns";
 import { DoubtReaction_E } from "@prisma/client";
 import { useMemo } from "react";

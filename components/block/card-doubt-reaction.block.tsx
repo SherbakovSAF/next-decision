@@ -1,10 +1,9 @@
-import { Doubt_E } from "@/app/types/doubt.types";
 import ColorCardElement from "../elements/color-card.element";
-
+import { DoubtReaction_E } from "@prisma/client"; 
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 interface CardDoubtReactionProps {
-  type: Doubt_E;
+  type: DoubtReaction_E;
   text: string;
   date: Date;
   className?: string;
