@@ -9,7 +9,6 @@
     "lint": "next lint",
     "prisma-gen": "npx prisma generate",
     "prisma-push": "npx prisma db push",
-    "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {
