@@ -1,8 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "../ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils.lib";
 import { DoubtReaction_E } from "@prisma/client";
+import {
+  getDoubtBgColor,
+  getDoubtTextColor,
+} from "@/consts/doubt-colors.const";
 
 interface Event {
   id: number;
@@ -130,8 +134,12 @@ const CalendarCell: React.FC<{
 
     if (reactionDoubt) {
       return reactionDoubt.status === DoubtReaction_E.GOOD
-        ? "bg-doubt-good text-doubt-good-secondary"
-        : "bg-doubt-bad text-doubt-bad-secondary";
+        ? `${getDoubtBgColor(DoubtReaction_E.GOOD).primary} ${
+            getDoubtTextColor(DoubtReaction_E.GOOD).secondary
+          }`
+        : `${getDoubtBgColor(DoubtReaction_E.BAD).primary} ${
+            getDoubtTextColor(DoubtReaction_E.BAD).secondary
+          }`;
     }
     return "bg-primary-foreground";
   };

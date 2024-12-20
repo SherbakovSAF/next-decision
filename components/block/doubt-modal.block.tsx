@@ -1,66 +1,161 @@
-import { Button } from "../ui/button";
-import ColorCardElement from "../elements/color-card.element";
-import { Textarea } from "../ui/textarea";
+"use client";
+import { createReactionService } from "@/services/reaction.service";
+import { Doubt_I } from "@/types/doubt.type";
+import { cn } from "@/lib/utils.lib";
+import { DoubtReaction_E, DoubtReaction_M } from "@prisma/client";
+import { useCallback, useEffect, useState } from "react";
 import { useLockBodyScroll, useToggle } from "react-use";
-// import { Doubt_E } from "@/app/types/doubt.types";
-import { DoubtReaction_E } from "@prisma/client";
+import ColorCardElement from "../elements/color-card.element";
+import { Button } from "../ui/button";
+import Icon from "../ui/icon";
+import { Textarea } from "../ui/textarea";
 
 interface Props {
-  children: React.ReactNode;
+  isViewModalValue: true;
+  onCloseModal: () => void;
+  doubt: Doubt_I;
+  reactionId?: number | null;
 }
 
-const DoubtModal: React.FC<Props> = ({ children }) => {
-  const [isViewModal, setViewModal] = useToggle(false);
-  useLockBodyScroll(isViewModal);
+const DoubtModal: React.FC<Props> = ({
+  onCloseModal,
+  isViewModalValue,
+  reactionId = null,
+  doubt,
+}) => {
+  const [isLoadingReaction, setLoadingReaction] = useState<boolean>(false);
+  const [isLoadingReactionRequest, setLoadingReactionRequest] =
+    useState<boolean>(false);
+  const [reaction, setReaction] = useState<DoubtReaction_M>({
+    id: 0,
+    text: "",
+    type: DoubtReaction_E.NORMAL,
+    userId: 1,
+    doubtId: doubt.id,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+
+  const [isViewModal, setViewModal] = useToggle(isViewModalValue);
+  useLockBodyScroll(isViewModalValue);
+
+  const callReactionById = useCallback(
+    (id: number) => {
+      try {
+        setLoadingReaction(true);
+        console.log("Вызов реакции", id);
+        reaction && setReaction(reaction);
+      } finally {
+        setLoadingReaction(false);
+      }
+    },
+    [reaction]
+  );
+
+  useEffect(() => {
+    if (isViewModal && reactionId) {
+      callReactionById(reactionId);
+    }
+  }, [isViewModal, reactionId, callReactionById]);
 
   const handleCloseModalOutside = (event: React.MouseEvent) => {
+    event.preventDefault();
     if (event.target === event.currentTarget) {
       event.preventDefault();
-      handleCloseModal();
+      handleCloseModal(event);
     }
   };
-  const handleOpenModal = () => {
-    setViewModal(true);
-  };
-  const handleCloseModal = () => {
-    setViewModal(false);
-  };
-  return (
-    <div>
-      <div onClick={() => handleOpenModal()}>{!isViewModal && children}</div>
 
-      {isViewModal && (
-        <div
-          className="fixed bg-[#0000007c] backdrop-blur-sm w-full h-full top-0 left-0 flex justify-center items-center"
-          onClick={(event) => handleCloseModalOutside(event)}
-        >
-          <div className="flex flex-col h-screen justify-center">
-            <header
-              onClick={handleCloseModal}
-              className="absolute right-0 top-0"
-            >
-              Закрыть
-            </header>
+  const handleCloseModal = (event: React.MouseEvent) => {
+    event.preventDefault();
+    setViewModal(false);
+    onCloseModal();
+  };
+
+  // TODO: Переделать с текстового варианта на прямой из енама
+  const setTypeReaction = (type: DoubtReaction_E) => {
+    setReaction({ ...reaction, type });
+  };
+
+  const getActiveClassByReactionType = (type: DoubtReaction_E) => {
+    return type === reaction.type
+      ? "border-2 border-primary drop-shadow-2xl"
+      : "";
+  };
+
+  const saveReaction = (event: React.MouseEvent) => {
+    try {
+      setLoadingReactionRequest(true);
+      !!reaction.id ? console.log("update") : createReactionService(reaction);
+    } finally {
+      handleCloseModal(event);
+      setLoadingReactionRequest(false);
+    }
+  };
+
+  return (
+    <div
+      className="z-10 fixed bg-[#0000007c] backdrop-blur-sm w-full  h-full top-0 left-0"
+      onClick={(event) => handleCloseModalOutside(event)}
+    >
+      <div className="w-[90%] max-w-[500px] h-fit  md:max-h-[75svh] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary-foreground backdrop-blur-sm  rounded-md p-3">
+        <header className="flex justify-center items-center">
+          <h3 className="text-xl w-full">{doubt.title}</h3>
+          <Button
+            size="icon"
+            className="ml-auto"
+            onClick={(event) => handleCloseModal(event)}
+          >
+            <Icon name="X" />
+          </Button>
+        </header>
+
+        {isLoadingReaction ? (
+          <>Loading....</>
+        ) : (
+          <>
             <main className="mt-auto">
-              <h3>Стоит ли мне покупать гитару?</h3>
-              <div className="flex justify-around">
+              <div className="flex justify-center gap-6 my-8">
                 <ColorCardElement
                   type={DoubtReaction_E.BAD}
-                  className="w-20 h-20 p-2"
+                  className={cn(
+                    "w-28 p-2 aspect-square rounded-xl ",
+                    getActiveClassByReactionType(DoubtReaction_E.BAD)
+                  )}
+                  onClick={() => setTypeReaction(DoubtReaction_E.BAD)}
                 />
                 <ColorCardElement
                   type={DoubtReaction_E.GOOD}
-                  className="w-20 h-20 p-2"
+                  className={cn(
+                    "w-28 aspect-square p-2 rounded-xl",
+                    getActiveClassByReactionType(DoubtReaction_E.GOOD)
+                  )}
+                  onClick={() => setTypeReaction(DoubtReaction_E.GOOD)}
                 />
               </div>
-              <Textarea placeholder="Поделитель эмоциями (необязательно)" />
+              <Textarea
+                className="resize-none min-h-24"
+                autoFocus
+                spellCheck
+                placeholder="Поделитель эмоциями (необязательно)"
+                value={reaction.text}
+                onChange={(event) =>
+                  setReaction({ ...reaction, text: event.target.value })
+                }
+              />
             </main>
-            <footer className="mt-auto mx-auto mb-4">
-              <Button>Отправить</Button>
+
+            <footer className="mx-auto mt-4 flex">
+              <Button
+                onClick={(event) => saveReaction(event)}
+                className="ml-auto"
+              >
+                {isLoadingReactionRequest ? "Loading" : "Отправить"}
+              </Button>
             </footer>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils.lib";
 
 interface MasonryGridProps<T> {
   columnNumber: number;

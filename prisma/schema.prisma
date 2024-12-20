@@ -1,35 +1,43 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
 model User_M {
-  id    Int       @id @default(autoincrement())
-  name  String?
-  Doubt Doubt_M[]
+  id           Int     @id @default(autoincrement())
+  login        String  @unique
+  password     String
+  isVerifyMail Boolean @default(false)
+  mail         String? @default("")
+  fullName     String? @default("")
+  refreshToken String? @default("")
 
-  @@map("users")
+  doubt           Doubt_M[]
+  doubtReaction_M DoubtReaction_M[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "users")
 }
 
 model Doubt_M {
-  id            Int               @id @default(autoincrement())
-  title         String
-  dateFinish    DateTime
-  userId        Int
-  user          User_M            @relation(fields: [userId], references: [id])
-  DoubtReaction DoubtReaction_M[]
+  id             Int               @id @default(autoincrement())
+  title          String
+  dateFinish     DateTime
+  userId         Int
+  user           User_M            @relation(fields: [userId], references: [id])
+  doubtReactions DoubtReaction_M[]
 
-  @@map("doubts")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "doubts")
 }
 
 enum DoubtReaction_E {
@@ -41,11 +49,14 @@ enum DoubtReaction_E {
 model DoubtReaction_M {
   id      Int             @id @default(autoincrement())
   text    String
-  date    DateTime
   type    DoubtReaction_E
   doubtId Int
   doubt   Doubt_M         @relation(fields: [doubtId], references: [id])
   userId  Int
+  user    User_M          @relation(fields: [userId], references: [id])
 
-  @@map("doubt_reaction")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "doubt_reaction")
 }

@@ -7,14 +7,22 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, redirect } from "next/navigation";
 import Icon from "../ui/icon";
+import { callApi } from "@/services/base.service";
+import { RoutePath_E } from "@/types/route-path.type";
+import Link from "next/link";
 
 function HeaderBlock() {
   const router = useRouter();
   const pathname = usePathname();
+
+  const logout = async () => {
+    await callApi("DELETE", "auth/logout");
+    redirect(RoutePath_E.AUTH);
+  };
   return (
-    <div className="flex justify-between items-center py-6">
+    <header className="flex justify-between items-center py-6">
       <div
         className="flex items-center gap-2 cursor-pointer"
         onClick={() => router.back()}
@@ -30,9 +38,11 @@ function HeaderBlock() {
         <TooltipProvider delayDuration={5}>
           <Tooltip>
             <TooltipTrigger>
-              <Button className="p-2" size="icon" asChild>
-                <Icon name="Settings" />
-              </Button>
+              <Link href={"/settings"}>
+                <Button className="p-2" size="icon" asChild>
+                  <Icon name="Settings" />
+                </Button>
+              </Link>
             </TooltipTrigger>
             <TooltipContent>
               <p>Настройки</p>
@@ -42,7 +52,12 @@ function HeaderBlock() {
         <TooltipProvider delayDuration={5}>
           <Tooltip>
             <TooltipTrigger>
-              <Button className="p-2" size="icon" asChild>
+              <Button
+                className="p-2"
+                size="icon"
+                asChild
+                onClick={() => logout()}
+              >
                 <Icon name="LogOut" />
               </Button>
             </TooltipTrigger>
@@ -52,7 +67,7 @@ function HeaderBlock() {
           </Tooltip>
         </TooltipProvider>
       </div>
-    </div>
+    </header>
   );
 }
 

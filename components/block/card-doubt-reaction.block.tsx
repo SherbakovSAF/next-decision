@@ -1,7 +1,7 @@
 import ColorCardElement from "../elements/color-card.element";
-import { DoubtReaction_E } from "@prisma/client"; 
+import { DoubtReaction_E } from "@prisma/client";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils.lib";
 interface CardDoubtReactionProps {
   type: DoubtReaction_E;
   text: string;
@@ -21,7 +21,7 @@ const CardDoubtReaction: React.FC<CardDoubtReactionProps> = ({
         "flex w-full bg-primary-foreground p-3 py-4 rounded-lg gap-3"
       )}
     >
-      <p className="w-full text-sm text-secondary">{text}</p>
+      <p className="w-full text-sm text-secondary break-all">{text}</p>
       <div className="flex flex-col gap-1 items-center">
         <p className="text-[0.6rem] font-normal">{format(date, "HH:mm")}</p>
         <ColorCardElement type={type} className="p-[0.25rem] rounded-lg" />
