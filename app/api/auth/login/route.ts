@@ -7,7 +7,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("Вошли");
     const data: User_M = await request.json();
+    console.log("data", data);
     // console.log(data);
     const finedUser = await prisma.user_M.findFirstOrThrow({
       where: {
@@ -15,18 +17,22 @@ export async function POST(request: NextRequest) {
         password: data.password,
       },
     });
+    console.log("finedUser", finedUser);
 
     // TODO: Вынести создание токена отдельно
 
     const response = NextResponse.json({ success: true }, { status: 200 });
+    console.log("response", response);
     const newAccessToken = await createJWTToken(
       { userId: finedUser.id },
       "1hr"
     );
+    console.log("newAccessToken", newAccessToken);
     const newRefreshToken = await createJWTToken(
       { message: "YourMom is so a big pig" },
       "7day"
     );
+    console.log("newRefreshToken", newRefreshToken);
     response.cookies.set(CookiesName.AccessToken, newAccessToken);
 
     response.cookies.set(CookiesName.RefreshToken, newRefreshToken);
@@ -34,6 +40,7 @@ export async function POST(request: NextRequest) {
       where: { id: finedUser.id },
       data: { refreshToken: newRefreshToken },
     });
+    console.log("Прошли обновление");
 
     return response;
   } catch (error) {
