@@ -19,7 +19,7 @@ export const AuthTokenMiddleware = async (
     const refreshToken = request.cookies.get(CookiesName.RefreshToken)?.value;
     if (!refreshToken)
       return NextResponse.redirect(new URL(RoutePath_E.AUTH, request.url));
-    console.log("1231");
+
     // TODO: Добавить в пути
     // Делаем запрос на сервер, чтобы он обновил auth в cookies
 

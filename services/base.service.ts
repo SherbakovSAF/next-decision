@@ -13,7 +13,7 @@ interface BaseParamsApi_I<T> {
 const isServer = typeof window === "undefined";
 
 const baseConfigAxios = {
-  baseURL: "http://localhost:3000/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 10000,
   withCredentials: true,
   headers: {
